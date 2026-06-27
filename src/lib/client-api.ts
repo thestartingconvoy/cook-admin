@@ -42,6 +42,13 @@ async function json<T>(res: Response): Promise<T> {
 }
 
 export const api = {
+  submitMenu: (draft: Record<string, unknown>) =>
+    fetch("/api/admin/menus/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(draft),
+    }).then(json),
+
   createMenu: (name: string) =>
     fetch("/api/admin/menus", {
       method: "POST",
