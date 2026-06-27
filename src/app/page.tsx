@@ -17,11 +17,12 @@ export default async function DashboardPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl p-6">
-      <header className="flex items-center justify-between">
+    <main className="mx-auto max-w-4xl px-5 py-8">
+      <header className="flex items-center justify-between border-b border-white/10 pb-6">
         <div>
-          <h1 className="text-2xl font-semibold">Menus</h1>
-          <p className="text-sm text-white/50">{session?.user?.email}</p>
+          <p className="text-sm text-white/40">Cook Admin</p>
+          <h1 className="mt-1 text-3xl font-semibold">Menus</h1>
+          <p className="mt-1 text-sm text-white/45">{session?.user?.email}</p>
         </div>
         <SignOutButton />
       </header>
