@@ -7,6 +7,9 @@ up, then deploy.
 Step 3 (voice notes) is optional. Step 5 is for when you're ready to point the
 cook app at this.
 
+Production admin URL: `https://cook-admin-lovat.vercel.app`
+Public menus API: `https://cook-admin-lovat.vercel.app/api/menus`
+
 ---
 
 ## 1. Supabase — database + file storage ✅ DONE
@@ -25,8 +28,8 @@ Project `cook-admin` (`qinybhmnlbevmugwoczy`, ap-south-1) is set up:
 ## 2. Google login — so only you can get in
 
 - [ ] Google Cloud Console → **APIs & Services → Credentials** → Create **OAuth client ID** → **Web application**
-- [ ] Add an **Authorized redirect URI**: `https://YOUR-APP.vercel.app/api/auth/callback/google`
-  - You can fill in the real URL after step 4. Add `http://localhost:3000/api/auth/callback/google` too if you want local dev.
+- [ ] Add an **Authorized redirect URI**: `https://cook-admin-lovat.vercel.app/api/auth/callback/google`
+  - Add `http://localhost:3000/api/auth/callback/google` too if you want local dev.
 - [ ] Copy the **Client ID** and **Client Secret**
 - [ ] Set env vars:
   - `GOOGLE_CLIENT_ID`
@@ -44,17 +47,19 @@ Project `cook-admin` (`qinybhmnlbevmugwoczy`, ap-south-1) is set up:
 
 ## 4. Deploy on Vercel
 
-- [ ] Import this repo as a **new** Vercel project
+- [x] Import this repo as a **new** Vercel project
 - [ ] Paste all the env vars above into **Project Settings → Environment Variables**
-- [ ] Deploy
+- [x] Deploy
 - [ ] Go back to step 2 and make sure the redirect URI uses your real Vercel URL
 - [ ] Visit the URL, sign in with your Google account, start making menus
+
+Deployment is currently live and building cleanly. Runtime is blocked until the required Vercel environment variables are set.
 
 ## 5. Connect the cook app — LAST, once this is live
 
 - [ ] In the **cook app** repo, edit `lib/menus.ts`:
   ```ts
-  const MENUS_URL = "https://YOUR-APP.vercel.app/api/menus";
+  const MENUS_URL = "https://cook-admin-lovat.vercel.app/api/menus";
   ```
 - That's the only change there. The JSON shape is identical to its mock `public/data/menus.json`.
 
