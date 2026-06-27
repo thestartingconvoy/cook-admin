@@ -3,6 +3,7 @@ import { submitMenuDraft } from "@/lib/submit-menu";
 import { requireAdmin, errorResponse } from "@/lib/guard";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const denied = await requireAdmin();
