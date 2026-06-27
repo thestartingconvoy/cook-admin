@@ -14,5 +14,6 @@ export async function requireAdmin(): Promise<NextResponse | null> {
 
 export function errorResponse(err: unknown): NextResponse {
   const message = err instanceof Error ? err.message : "Unknown error";
+  console.error("[cook-admin] Admin route failed", err);
   return NextResponse.json({ error: message }, { status: 500 });
 }
