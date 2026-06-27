@@ -14,6 +14,10 @@ export interface MenuSubmitInput {
   }[];
 }
 
+function isGoogleTtsError(err: unknown): boolean {
+  return err instanceof Error && err.message.startsWith("Google TTS failed");
+}
+
 export async function submitMenuDraft(input: MenuSubmitInput): Promise<MenuWithChildren> {
   const name = input.name.trim();
   if (!name) throw new Error("Menu name is required");
@@ -66,7 +70,12 @@ export async function submitMenuDraft(input: MenuSubmitInput): Promise<MenuWithC
     const { error: mealsError } = await supabase.from("meals").insert(mealRows);
     if (mealsError) throw new Error(mealsError.message);
 
-    await regenerateDayTts(dayId);
+    try {
+      await regenerateDayTts(dayId);
+    } catch (err) {
+      if (!isGoogleTtsError(err)) throw err;
+      console.error("[cook-admin] TTS generation failed; menu was saved without audio", err);
+    }
   }
 
   const saved = await getMenu(menuId);
