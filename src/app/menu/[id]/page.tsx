@@ -16,9 +16,9 @@ export default async function MenuEditorPage({
   if (!menu) notFound();
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
+    <main className="mx-auto max-w-3xl px-5 py-8">
       <Link href="/" className="text-sm text-white/50 hover:text-white">
-        ← All menus
+        Back to menus
       </Link>
       <EditorClient initialMenu={menu} ttsEnabled={ttsEnabled()} />
     </main>
