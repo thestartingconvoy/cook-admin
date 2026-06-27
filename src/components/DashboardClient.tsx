@@ -4,104 +4,82 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/client-api";
-import type { MenuRow, MenuWithChildren } from "@/lib/types";
+import type { MenuWithChildren } from "@/lib/types";
 
 export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildren[] }) {
   const router = useRouter();
   const [menus, setMenus] = useState(initialMenus);
   const [name, setName] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function create() {
-    if (!name.trim()) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const menu = (await api.createMenu(name.trim())) as MenuRow;
-      router.push(`/menu/${menu.id}`);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed");
-      setBusy(false);
-    }
+  function startDraft() {
+    const trimmed = name.trim();
+    if (!trimmed || busy) return;
+    setBusy("create");
+    const params = new URLSearchParams({ name: trimmed });
+    router.push(`/menu/new?${params.toString()}`);
   }
 
   async function remove(id: string) {
-    if (!confirm("Delete this menu and all its days/meals?")) return;
+    if (busy || !confirm("Delete this menu?")) return;
+    setBusy(`delete-${id}`);
+    setError(null);
     try {
       await api.deleteMenu(id);
-      setMenus((m) => m.filter((x) => x.id !== id));
+      setMenus((current) => current.filter((menu) => menu.id !== id));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed");
+      setError(e instanceof Error ? e.message : "Failed to delete menu");
+    } finally {
+      setBusy(null);
     }
   }
 
   return (
-    <div className="mt-8">
-      <div className="flex gap-2">
+    <div className="mt-10">
+      <div className="flex gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-2 shadow-2xl shadow-black/20">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && create()}
-          placeholder="New menu name, e.g. North Indian Veg"
-          className="flex-1 rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 outline-none focus:border-white/40"
+          onKeyDown={(e) => e.key === "Enter" && startDraft()}
+          placeholder="New menu name"
+          className="min-w-0 flex-1 rounded-xl bg-transparent px-4 py-3 text-sm outline-none placeholder:text-white/30"
         />
         <button
-          onClick={create}
-          disabled={busy}
-          className="rounded-xl bg-white px-4 py-2.5 font-medium text-black disabled:opacity-50"
+          onClick={startDraft}
+          disabled={Boolean(busy) || !name.trim()}
+          className="min-w-28 rounded-xl bg-white px-4 py-3 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Create
+          {busy === "create" ? "Opening..." : "Create"}
         </button>
       </div>
-      {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+      {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
 
-      <ul className="mt-6 space-y-3">
+      <ul className="mt-7 divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
         {menus.length === 0 && (
-          <li className="rounded-xl border border-dashed border-white/15 p-8 text-center text-white/40">
-            No menus yet. Create your first one above.
-          </li>
+          <li className="p-10 text-center text-sm text-white/40">No menus yet.</li>
         )}
         {menus.map((menu) => (
-          <li
-            key={menu.id}
-            className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-4"
-          >
-            <div className="flex items-center gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {menu.cover_url ? (
-                <img
-                  src={menu.cover_url}
-                  alt=""
-                  className="h-12 w-12 rounded-lg object-cover"
-                />
-              ) : (
-                <div className="h-12 w-12 rounded-lg bg-white/10" />
-              )}
-              <div>
-                <Link href={`/menu/${menu.id}`} className="font-medium hover:underline">
-                  {menu.name}
-                </Link>
-                <p className="text-xs text-white/40">
-                  {menu.days?.length ?? 0} day(s) · {menu.id}
-                </p>
-              </div>
+          <li key={menu.id} className="flex items-center justify-between gap-4 p-4">
+            <div className="min-w-0">
+              <p className="truncate font-medium">{menu.name}</p>
+              <p className="mt-1 text-xs text-white/40">
+                {menu.days?.length ?? 0} day(s) / {menu.published ? "Live" : "Draft"}
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-xs ${
-                  menu.published
-                    ? "bg-green-500/20 text-green-300"
-                    : "bg-white/10 text-white/50"
-                }`}
+            <div className="flex shrink-0 items-center gap-2">
+              <Link
+                href={`/menu/${menu.id}`}
+                className="rounded-lg border border-white/15 px-3 py-2 text-sm text-white/80 transition hover:bg-white/10"
               >
-                {menu.published ? "Live" : "Draft"}
-              </span>
+                Edit
+              </Link>
               <button
                 onClick={() => remove(menu.id)}
-                className="text-sm text-white/40 hover:text-red-400"
+                disabled={Boolean(busy)}
+                className="rounded-lg px-3 py-2 text-sm text-white/40 transition hover:bg-red-500/10 hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Delete
+                {busy === `delete-${menu.id}` ? "Deleting..." : "Delete"}
               </button>
             </div>
           </li>
