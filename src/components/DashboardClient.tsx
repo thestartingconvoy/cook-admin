@@ -119,30 +119,32 @@ export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildr
               return (
                 <li
                   key={menu.id}
-                  onClick={() => openMenu(menu.id)}
+                  onClick={() => !isProtected && openMenu(menu.id)}
                   className={[
-                    "flex cursor-pointer items-center justify-between gap-4 bg-white/[0.025] px-5 py-4 transition",
-                    isNavigating ? "bg-white/[0.05]" : "hover:bg-white/[0.04]",
+                    "flex items-center justify-between gap-4 bg-white/[0.025] px-5 py-4 transition",
+                    isProtected ? "cursor-default" : "cursor-pointer",
+                    isNavigating ? "bg-white/[0.05]" : (!isProtected ? "hover:bg-white/[0.04]" : ""),
                     (navigating && !isNavigating) ? "opacity-50" : "",
                   ].join(" ")}
                 >
-                  {/* Left: name + meta */}
-                  <div className="flex min-w-0 items-center gap-3">
-                    {/* Always reserve spinner space so row height never shifts */}
-                    <span className={`shrink-0 text-white/40 ${isNavigating ? "" : "invisible"}`}>
+                  {/* Left: name + meta — no truncate, let the row grow */}
+                  <div className="flex-1">
+                    <p className="text-[15px] font-medium tracking-tight">{menu.name}</p>
+                    <p className="mt-0.5 text-xs text-white/35">
+                      {menu.days?.length ?? 0} day{(menu.days?.length ?? 0) !== 1 ? "s" : ""}
+                      <span className="mx-1.5 text-white/20">·</span>
+                      <span className={menu.published ? "text-emerald-400/80" : "text-white/30"}>
+                        {menu.published ? "Live" : "Draft"}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Row-click spinner: only when row was clicked (not Edit button) */}
+                  {isNavigating && editNav !== menu.id && (
+                    <span className="shrink-0 text-white/30">
                       <Spinner />
                     </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-[15px] font-medium tracking-tight">{menu.name}</p>
-                      <p className="mt-0.5 text-xs text-white/35">
-                        {menu.days?.length ?? 0} day{(menu.days?.length ?? 0) !== 1 ? "s" : ""}
-                        <span className="mx-1.5 text-white/20">·</span>
-                        <span className={menu.published ? "text-emerald-400/80" : "text-white/30"}>
-                          {menu.published ? "Live" : "Draft"}
-                        </span>
-                      </p>
-                    </div>
-                  </div>
+                  )}
 
                   {/* Right: actions */}
                   <div
