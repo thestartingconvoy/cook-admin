@@ -12,12 +12,27 @@ export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildr
   const [name, setName] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmCopy, setConfirmCopy] = useState<string | null>(null);
 
   function startDraft() {
     const trimmed = name.trim();
     if (!trimmed || busy) return;
     setBusy("create");
     router.push(`/menu/new?${new URLSearchParams({ name: trimmed }).toString()}`);
+  }
+
+  async function doCopy(id: string) {
+    setConfirmCopy(null);
+    setBusy(`copy-${id}`);
+    setError(null);
+    try {
+      const copy = (await api.copyMenu(id)) as (typeof menus)[number];
+      setMenus((c) => [...c, copy]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to copy menu");
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function remove(id: string) {
@@ -93,19 +108,48 @@ export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildr
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Link
-                    href={`/menu/${menu.id}`}
-                    className="rounded-xl border border-white/10 px-3.5 py-2 text-[13px] text-white/70 transition hover:border-white/20 hover:bg-white/8 hover:text-white"
-                  >
-                    Edit
-                  </Link>
-                  <button
-                    onClick={() => remove(menu.id)}
-                    disabled={Boolean(busy)}
-                    className="rounded-xl px-3.5 py-2 text-[13px] text-white/30 transition hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
-                  >
-                    {busy === `delete-${menu.id}` ? "…" : "Delete"}
-                  </button>
+                  {confirmCopy === menu.id ? (
+                    // Inline confirmation
+                    <div className="flex items-center gap-2">
+                      <span className="text-[12px] text-white/50">Make a copy?</span>
+                      <button
+                        onClick={() => doCopy(menu.id)}
+                        disabled={Boolean(busy)}
+                        className="rounded-lg bg-white px-3 py-1.5 text-[12px] font-semibold text-black transition hover:bg-white/90 disabled:opacity-40"
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => setConfirmCopy(null)}
+                        className="rounded-lg px-3 py-1.5 text-[12px] text-white/40 transition hover:text-white/70"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <Link
+                        href={`/menu/${menu.id}`}
+                        className="rounded-xl border border-white/10 px-3.5 py-2 text-[13px] text-white/70 transition hover:border-white/20 hover:bg-white/8 hover:text-white"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => setConfirmCopy(menu.id)}
+                        disabled={Boolean(busy)}
+                        className="rounded-xl px-3.5 py-2 text-[13px] text-white/30 transition hover:bg-white/8 hover:text-white/60 disabled:opacity-40"
+                      >
+                        {busy === `copy-${menu.id}` ? "…" : "Copy"}
+                      </button>
+                      <button
+                        onClick={() => remove(menu.id)}
+                        disabled={Boolean(busy)}
+                        className="rounded-xl px-3.5 py-2 text-[13px] text-white/30 transition hover:bg-red-500/10 hover:text-red-300 disabled:opacity-40"
+                      >
+                        {busy === `delete-${menu.id}` ? "…" : "Delete"}
+                      </button>
+                    </>
+                  )}
                 </div>
               </li>
             ))}

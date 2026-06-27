@@ -11,6 +11,7 @@ export default auth((req) => {
   const isPublic =
     pathname.startsWith("/api/menus") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/app-icon") ||
     pathname === "/login";
 
   if (isPublic) return NextResponse.next();

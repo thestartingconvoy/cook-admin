@@ -262,6 +262,39 @@ export async function clearCustomDayAudio(dayId: string): Promise<void> {
   await regenerateDayTts(dayId);
 }
 
+// ---- Copy menu -----------------------------------------------------------
+
+export async function copyMenu(id: string): Promise<MenuRow> {
+  const source = await getMenu(id);
+  if (!source) throw new Error("Menu not found");
+
+  const supabase = getSupabase();
+  const copy = await createMenu(`${source.name} Copy`);
+
+  const days = [...source.days].sort((a, b) => a.position - b.position);
+  for (const day of days) {
+    const { data: newDay, error: dayErr } = await supabase
+      .from("days")
+      .insert({ menu_id: copy.id, position: day.position })
+      .select("id")
+      .single();
+    if (dayErr) throw new Error(dayErr.message);
+
+    const meals = [...day.meals].sort((a, b) => a.position - b.position);
+    for (const meal of meals) {
+      const { error: mealErr } = await supabase.from("meals").insert({
+        day_id: newDay.id,
+        position: meal.position,
+        name: meal.name,
+        image_url: meal.image_url,
+      });
+      if (mealErr) throw new Error(mealErr.message);
+    }
+  }
+
+  return copy;
+}
+
 // ---- TTS regeneration ----------------------------------------------------
 
 // Regenerate a day's voice note from its meal names, unless a custom recording

@@ -66,6 +66,9 @@ export const api = {
   deleteMenu: (id: string) =>
     fetch(`/api/admin/menus/${id}`, { method: "DELETE" }).then(json),
 
+  copyMenu: (id: string) =>
+    fetch(`/api/admin/menus/${id}/copy`, { method: "POST" }).then(json),
+
   uploadCover: (id: string, file: File) => {
     const fd = new FormData();
     fd.append("file", file);
