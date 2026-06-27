@@ -2,12 +2,43 @@
 
 // Thin fetch wrappers for the admin API, used by client components.
 
-async function json<T>(res: Response): Promise<T> {
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error((body as { error?: string }).error || `Request failed (${res.status})`);
+type ApiErrorPayload = {
+  status: number;
+  statusText: string;
+  url: string;
+  body: unknown;
+};
+
+async function readBody(res: Response): Promise<unknown> {
+  const text = await res.text().catch(() => "");
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return text;
   }
-  return res.json() as Promise<T>;
+}
+
+async function json<T>(res: Response): Promise<T> {
+  const body = await readBody(res);
+
+  if (!res.ok) {
+    const payload: ApiErrorPayload = {
+      status: res.status,
+      statusText: res.statusText,
+      url: res.url,
+      body,
+    };
+    console.error("[cook-admin] Admin API request failed", payload);
+
+    const message =
+      body && typeof body === "object" && "error" in body
+        ? String((body as { error?: unknown }).error)
+        : `Request failed (${res.status})`;
+    throw new Error(message);
+  }
+
+  return body as T;
 }
 
 export const api = {
