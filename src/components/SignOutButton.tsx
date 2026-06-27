@@ -1,4 +1,5 @@
 import { signOut } from "@/auth";
+import { FormSubmitButton } from "./FormSubmitButton";
 
 export function SignOutButton() {
   return (
@@ -8,12 +9,12 @@ export function SignOutButton() {
         await signOut({ redirectTo: "/login" });
       }}
     >
-      <button
-        type="submit"
-        className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-white/70 transition hover:bg-white/10"
+      <FormSubmitButton
+        pendingText="Signing out..."
+        className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-white/70 transition hover:bg-white/10 disabled:cursor-wait disabled:opacity-60"
       >
         Sign out
-      </button>
+      </FormSubmitButton>
     </form>
   );
 }
