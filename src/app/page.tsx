@@ -6,8 +6,13 @@ import type { MenuWithChildren } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string }>;
+}) {
   const session = await auth();
+  const { saved } = await searchParams;
   let menus: MenuWithChildren[] = [];
   let loadError: string | null = null;
   try {
@@ -26,6 +31,12 @@ export default async function DashboardPage() {
         </div>
         <SignOutButton />
       </header>
+
+      {saved === "1" && (
+        <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+          Menu submitted. It is now available from the public menu API.
+        </div>
+      )}
 
       {loadError ? (
         <div className="mt-8 rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 text-sm text-yellow-200">
