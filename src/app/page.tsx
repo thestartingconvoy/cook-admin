@@ -22,19 +22,21 @@ export default async function DashboardPage({
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-5 py-8">
-      <header className="flex items-center justify-between border-b border-white/10 pb-6">
+    <main className="mx-auto max-w-2xl px-5 py-10">
+      <header className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-white/40">Cook Admin</p>
-          <h1 className="mt-1 text-3xl font-semibold">Menus</h1>
-          <p className="mt-1 text-sm text-white/45">{session?.user?.email}</p>
+          <p className="text-[11px] font-medium uppercase tracking-widest text-white/25">
+            Cook Admin
+          </p>
+          <h1 className="mt-1.5 text-3xl font-bold tracking-tight">Menus</h1>
+          <p className="mt-1 text-[13px] text-white/35">{session?.user?.email}</p>
         </div>
         <SignOutButton />
       </header>
 
       {saved === "1" && (
-        <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-          Menu submitted. It is now available from the public menu API.
+        <div className="mt-6 rounded-2xl border border-emerald-400/15 bg-emerald-400/8 px-4 py-3 text-sm text-emerald-200/90">
+          Menu submitted — now live in the public API.
         </div>
       )}
 
