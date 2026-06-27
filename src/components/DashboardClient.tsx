@@ -22,6 +22,7 @@ export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildr
   const [name, setName] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [navigating, setNavigating] = useState<string | null>(null);
+  const [editNav, setEditNav] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmCopy, setConfirmCopy] = useState<string | null>(null);
 
@@ -34,6 +35,13 @@ export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildr
 
   function openMenu(id: string) {
     if (navigating || busy) return;
+    setNavigating(id);
+    router.push(`/menu/${id}`);
+  }
+
+  function openMenuFromEdit(id: string) {
+    if (navigating || busy) return;
+    setEditNav(id);
     setNavigating(id);
     router.push(`/menu/${id}`);
   }
@@ -120,11 +128,10 @@ export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildr
                 >
                   {/* Left: name + meta */}
                   <div className="flex min-w-0 items-center gap-3">
-                    {isNavigating && (
-                      <span className="shrink-0 text-white/40">
-                        <Spinner />
-                      </span>
-                    )}
+                    {/* Always reserve spinner space so row height never shifts */}
+                    <span className={`shrink-0 text-white/40 ${isNavigating ? "" : "invisible"}`}>
+                      <Spinner />
+                    </span>
                     <div className="min-w-0">
                       <p className="truncate text-[15px] font-medium tracking-tight">{menu.name}</p>
                       <p className="mt-0.5 text-xs text-white/35">
@@ -164,12 +171,11 @@ export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildr
                         {/* Edit — hidden for protected menu */}
                         {!isProtected && (
                           <button
-                            onClick={() => openMenu(menu.id)}
+                            onClick={() => openMenuFromEdit(menu.id)}
                             disabled={Boolean(navigating) || Boolean(busy)}
-                            className="flex items-center gap-1.5 rounded-xl border border-white/10 px-3.5 py-2 text-[13px] text-white/70 transition hover:border-white/20 hover:bg-white/8 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex w-[3.25rem] items-center justify-center rounded-xl border border-white/10 py-2 text-[13px] text-white/70 transition hover:border-white/20 hover:bg-white/8 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                           >
-                            {isNavigating ? <Spinner /> : null}
-                            {isNavigating ? "Opening…" : "Edit"}
+                            {editNav === menu.id ? <Spinner /> : "Edit"}
                           </button>
                         )}
 
@@ -177,9 +183,9 @@ export function DashboardClient({ initialMenus }: { initialMenus: MenuWithChildr
                         <button
                           onClick={() => setConfirmCopy(menu.id)}
                           disabled={Boolean(busy) || Boolean(navigating)}
-                          className="rounded-xl px-3.5 py-2 text-[13px] text-white/30 transition hover:bg-white/8 hover:text-white/60 disabled:opacity-40"
+                          className="flex w-[3.25rem] items-center justify-center rounded-xl py-2 text-[13px] text-white/30 transition hover:bg-white/8 hover:text-white/60 disabled:opacity-40"
                         >
-                          {busy === `copy-${menu.id}` ? "…" : "Copy"}
+                          {busy === `copy-${menu.id}` ? <Spinner /> : "Copy"}
                         </button>
 
                         {/* Delete — hidden for protected menu */}
