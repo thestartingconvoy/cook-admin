@@ -15,11 +15,6 @@ type DraftDay = {
   meals: DraftMeal[];
 };
 
-const LANGS = [
-  { value: "en-IN", label: "English" },
-  { value: "hi-IN", label: "Hindi" },
-];
-
 function key(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
@@ -47,10 +42,10 @@ export function EditorClient({
 }) {
   const router = useRouter();
   const [name, setName] = useState(initialMenu?.name ?? initialName ?? "");
-  const [lang, setLang] = useState(initialMenu?.tts_lang || "en-IN");
   const [days, setDays] = useState<DraftDay[]>(() => draftFromMenu(initialMenu));
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const ttsLang = initialMenu?.tts_lang || "en-IN";
 
   const mealCount = useMemo(
     () => days.reduce((sum, day) => sum + day.meals.filter((meal) => meal.name.trim()).length, 0),
@@ -117,10 +112,10 @@ export function EditorClient({
     setBusy("submit");
     setError(null);
     try {
-      const submitted = (await api.submitMenu({
+      await api.submitMenu({
         id: initialMenu?.id,
         name,
-        tts_lang: lang,
+        tts_lang: ttsLang,
         published: true,
         days: days
           .map((day) => ({
@@ -129,8 +124,8 @@ export function EditorClient({
               .filter((meal) => meal.name),
           }))
           .filter((day) => day.meals.length),
-      })) as MenuWithChildren;
-      router.push(`/menu/${submitted.id}`);
+      });
+      router.push("/?saved=1");
       router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not submit menu");
@@ -150,20 +145,6 @@ export function EditorClient({
               placeholder="North Indian Veg"
               className="mt-2 w-full bg-transparent text-2xl font-semibold outline-none placeholder:text-white/20"
             />
-          </label>
-          <label className="sm:w-36">
-            <span className="text-xs uppercase text-white/35">Voice</span>
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value)}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none"
-            >
-              {LANGS.map((option) => (
-                <option key={option.value} value={option.value} className="bg-zinc-950">
-                  {option.label}
-                </option>
-              ))}
-            </select>
           </label>
           <button
             onClick={submit}
