@@ -32,8 +32,13 @@ create index if not exists days_menu_id_idx on days(menu_id);
 create index if not exists meals_day_id_idx on meals(day_id);
 
 -- The app talks to the database with the service-role key from server code
--- only, and access is gated by Auth.js. RLS is therefore left disabled. If you
--- prefer to enable RLS, add policies before doing so or every query will fail.
+-- only (which bypasses RLS), and access is gated by Auth.js. We enable RLS with
+-- NO policies so the public anon key is fully locked out while server code keeps
+-- working. Do not add permissive policies unless you intend to expose these
+-- tables to the anon/authenticated roles.
+alter table menus enable row level security;
+alter table days  enable row level security;
+alter table meals enable row level security;
 
 -- ---------------------------------------------------------------------------
 -- Storage: create a PUBLIC bucket named to match SUPABASE_STORAGE_BUCKET

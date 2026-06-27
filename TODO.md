@@ -9,15 +9,18 @@ cook app at this.
 
 ---
 
-## 1. Supabase — database + file storage
+## 1. Supabase — database + file storage ✅ DONE
 
-- [ ] Create a project at [supabase.com](https://supabase.com)
-- [ ] **SQL Editor** → paste the contents of [`supabase/schema.sql`](supabase/schema.sql) → **Run** (creates the menus/days/meals tables)
-- [ ] **Storage** → create a bucket named `cook-media` → make it **Public**
-- [ ] From **Settings → API**, copy the **Project URL** and the **service_role** key
-- [ ] Set env vars:
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `SUPABASE_SERVICE_ROLE_KEY`
+Project `cook-admin` (`qinybhmnlbevmugwoczy`, ap-south-1) is set up:
+
+- [x] Project created
+- [x] Tables `menus` / `days` / `meals` created (schema applied)
+- [x] Public storage bucket `cook-media` created
+- [x] RLS enabled on all tables (anon key locked out; server uses service_role)
+- [ ] Set env vars in Vercel:
+  - `NEXT_PUBLIC_SUPABASE_URL` = `https://qinybhmnlbevmugwoczy.supabase.co`
+  - `SUPABASE_SERVICE_ROLE_KEY` = from **Settings → API → service_role** (secret)
+  - `SUPABASE_STORAGE_BUCKET` = `cook-media` (optional, this is the default)
 
 ## 2. Google login — so only you can get in
 
